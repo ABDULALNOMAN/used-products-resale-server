@@ -42,8 +42,10 @@ const run = async() => {
             res.send(result)
             console.log(result)
         })
-        app.get('/users', async (req, res) => {
-            const email = req.query.email
+        app.get('/users', async(req, res) => {
+            const data = req.query.email
+            console.log(data)
+            const email = {email:data}
             const result = await userInformation.findOne(email)
             if (result) {
                 return res.send(result)
