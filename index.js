@@ -10,7 +10,7 @@ app.use(cors())
 app.use(express.json())
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.USER_KEY}@cluster0.epy9glr.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const run = async() => {
@@ -25,15 +25,15 @@ const run = async() => {
             const result = await userServices.find(query).toArray()
             res.send(result)
         })
-        app.get('/category/:id',async(req,res)=>{
-            const id = req.params.id;
-            const query = {categoryId:id}
+        app.get('/category/:name',async(req,res)=>{
+            const id = req.params.name;
+            const query = {categroy:id}
             const result = await servicesProducts.find(query).toArray()
             res.send(result)
         })
         app.post('/bookitem',async(req,res)=>{
-            const data = req.body
-            const result = await userBooking.insertOne(data)
+            const query = req.body;
+            const result = await userBooking.insertOne(query)
             res.send(result)
         })
         app.post('/userstore', async(req,res) => {
@@ -44,12 +44,34 @@ const run = async() => {
         })
         app.get('/users', async(req, res) => {
             const data = req.query.email
-            console.log(data)
-            const email = {email:data}
+            const email ={email:data}
             const result = await userInformation.findOne(email)
             if (result) {
                 return res.send(result)
             }
+        })
+        app.post('/productsadd', async(req, res) => {
+            const query = req.body;
+            const result = await servicesProducts.insertOne(query)
+            res.send(result)
+        })
+        app.get('/allseller',async(req,res)=>{
+            const query = { }
+            const result = await userInformation.find(query).toArray()
+            const datas = result.filter(data=>data.user==='seller')
+            res.send(datas)
+        })
+        app.get('/alluser',async(req,res)=>{
+            const query = { }
+            const result = await userInformation.find(query).toArray()
+            const datas = result.filter(data=>data.user==='user')
+            res.send(datas)
+        })
+        app.delete('/userdelete',async(req,res)=>{
+            const query = req.query.email;
+            const email = {email:query}
+            const result = await userInformation.deleteOne(email)
+            res.send(result)
         })
     }
     finally {
