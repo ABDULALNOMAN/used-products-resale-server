@@ -39,7 +39,7 @@ const run = async() => {
             const updateDoc = {
                 $set:{
                     customerInfo: item,
-                    status:'booked'
+                    status:'sold'
                 }
             }
             const result = await servicesProducts.updateOne(filter,updateDoc,options)
@@ -109,6 +109,12 @@ const run = async() => {
                     console.log(result)
                 }
             }
+        })
+        app.get('/myproducts',async(req,res)=>{
+            const data = req.query.email;
+            const email = { seller_email: data }
+            const result = await servicesProducts.find(email).toArray()
+            console.log(result)
         })
     }
     finally {
