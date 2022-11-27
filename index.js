@@ -38,7 +38,8 @@ const run = async() => {
             const options = { upsert: true };
             const updateDoc = {
                 $set:{
-                    customerInfo:item
+                    customerInfo: item,
+                    status:'booked'
                 }
             }
             const result = await servicesProducts.updateOne(filter,updateDoc,options)
@@ -50,7 +51,14 @@ const run = async() => {
             res.send(result)
         })
         app.post('/productsadd', async(req, res) => {
+            const data = req.query.email;
+            const email = { email: data }
+            const userInfo = await userInformation.findOne(email)
+            if (userInfo.user !== 'seller') {
+                res.status(401).send({messege:'invalid user'})
+            }
             const query = req.body;
+            console.log(userInfo)
             const result = await servicesProducts.insertOne(query)
             res.send(result)
         })
