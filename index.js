@@ -31,29 +31,36 @@ const run = async() => {
             const result = await servicesProducts.find(query).toArray()
             res.send(result)
         })
-        app.post('/bookitem',async(req,res)=>{
-            const query = req.body;
-            const result = await userBooking.insertOne(query)
+        app.put('/bookitem',async(req,res)=>{
+            const query = req.query.id;
+            const item = req.body 
+            const filter = { _id: ObjectId(query) }
+            const options = { upsert: true };
+            const updateDoc = {
+                $set:{
+                    customerInfo:item
+                }
+            }
+            const result = await servicesProducts.updateOne(filter,updateDoc,options)
             res.send(result)
         })
         app.post('/userstore', async(req,res) => {
             const data = req.body;
             const result = await userInformation.insertOne(data)
             res.send(result)
-            console.log(result)
-        })
-        app.get('/users', async(req, res) => {
-            const data = req.query.email
-            const email ={email:data}
-            const result = await userInformation.findOne(email)
-            if (result) {
-                return res.send(result)
-            }
         })
         app.post('/productsadd', async(req, res) => {
             const query = req.body;
             const result = await servicesProducts.insertOne(query)
             res.send(result)
+        })
+        app.get('/users',async(req, res) => {
+            const data = req.query.email
+            const email={email:data}
+            const result =await userInformation.findOne(email)
+            if(result){
+                return res.send(result)
+            }
         })
         app.get('/allseller',async(req,res)=>{
             const query = { }
@@ -72,6 +79,28 @@ const run = async() => {
             const email = {email:query}
             const result = await userInformation.deleteOne(email)
             res.send(result)
+        })
+        app.get('/buyersCheck', async(req, res) => {
+            const query = req.query.buyer;
+            const email = {email:query}
+            const result = await userInformation.findOne(email)
+            if (result) {
+                if(result.user === 'user') {
+                    res.send(result)
+                    console.log(result)
+                }
+            }
+        })
+        app.get('/sellerCheck', async(req, res) => {
+            const query = req.query.seller;
+            const email = {email:query}
+            const result = await userInformation.findOne(email)
+            if (result) {
+                if(result.user === 'seller') {
+                    res.send(result)
+                    console.log(result)
+                }
+            }
         })
     }
     finally {
