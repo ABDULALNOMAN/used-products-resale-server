@@ -110,6 +110,16 @@ const run = async() => {
                 }
             }
         })
+        app.get('/admincheck', async(req, res) => {
+            const query = req.query.admin;
+            const email = {email:query}
+            const result = await userInformation.findOne(email)
+            if (result) {
+                if(result.user === 'admin') {
+                    res.send(result)
+                }
+            }
+        })
         app.get('/myproducts',async(req,res)=>{
             const data = req.query.email;
             const email={seller_email:data }
@@ -120,6 +130,12 @@ const run = async() => {
             const query = req.body;
             const result = await availableBooking.insertOne(query)
             console.log(result)
+            res.send(result)
+        })
+        app.delete('/deleteadvatise', async(req, res) => {
+            const query = req.query.id
+            const id = { _id: ObjectId(query) }
+            const result = await servicesProducts.deleteOne(id)
             res.send(result)
         })
         app.get('/homeadvertise', async(req, res) => {
