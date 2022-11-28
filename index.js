@@ -59,7 +59,6 @@ const run = async() => {
                 res.status(401).send({messege:'invalid user'})
             }
             const query = req.body;
-            console.log(userInfo)
             const result = await servicesProducts.insertOne(query)
             res.send(result)
         })
@@ -129,7 +128,6 @@ const run = async() => {
         app.post('/advertize', async(req, res) => {
             const query = req.body;
             const result = await availableBooking.insertOne(query)
-            console.log(result)
             res.send(result)
         })
         app.delete('/deleteadvatise', async(req, res) => {
