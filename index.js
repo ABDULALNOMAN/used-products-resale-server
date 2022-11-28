@@ -11,13 +11,14 @@ app.use(express.json())
 
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { query } = require('express');
 const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.USER_KEY}@cluster0.epy9glr.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const run = async() => {
     try {
         const userServices = client.db("gsmarea").collection('category')
         const servicesProducts = client.db('gsmarea').collection('products')
-        const userBooking = client.db('gsmarea').collection('booking')
+        const availableBooking = client.db('gsmarea').collection('advertizeitem')
         const userInformation = client.db('gsmarea').collection('identity')
 
         app.get('/services', async(req, res) => {
@@ -106,15 +107,25 @@ const run = async() => {
             if (result) {
                 if(result.user === 'seller') {
                     res.send(result)
-                    console.log(result)
                 }
             }
         })
         app.get('/myproducts',async(req,res)=>{
             const data = req.query.email;
-            const email = { seller_email: data }
+            const email={seller_email:data }
             const result = await servicesProducts.find(email).toArray()
+            res.send(result)
+        })
+        app.post('/advertize', async(req, res) => {
+            const query = req.body;
+            const result = await availableBooking.insertOne(query)
             console.log(result)
+            res.send(result)
+        })
+        app.get('/homeadvertise', async(req, res) => {
+            const query = {}
+            const result = await availableBooking.find(query).toArray()
+            res.send(result)
         })
     }
     finally {
