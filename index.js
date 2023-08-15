@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express()
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
 require('dotenv').config()
 
@@ -10,9 +11,8 @@ app.use(cors())
 app.use(express.json())
 
 
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const { query } = require('express');
 const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.USER_KEY}@cluster0.epy9glr.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = "mongodb://localhost:27017/"
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 const run = async() => {
     try {
@@ -27,15 +27,15 @@ const run = async() => {
             res.send(result)
         })
         app.get('/category/:name',async(req,res)=>{
-            const id = req.params.name;
-            const query = {categroy:id}
+            const name = req.params.name;
+            const query = {categroy:name}
             const result = await servicesProducts.find(query).toArray()
             res.send(result)
         })
         app.put('/bookitem',async(req,res)=>{
             const query = req.query.id;
             const item = req.body 
-            const filter = { _id: ObjectId(query) }
+            const filter = { _id: ObjectId(query)}
             const options = { upsert: true };
             const updateDoc = {
                 $set:{
@@ -54,13 +54,15 @@ const run = async() => {
         app.post('/productsadd', async(req, res) => {
             const data = req.query.email;
             const email = { email: data }
+            const query = req.body;
             const userInfo = await userInformation.findOne(email)
-            if (userInfo.user !== 'seller') {
+            if (userInfo.visitor != 'seller') {
                 res.status(401).send({messege:'invalid user'})
             }
-            const query = req.body;
-            const result = await servicesProducts.insertOne(query)
-            res.send(result)
+            else{
+                const result = await servicesProducts.insertOne(query)
+                res.send(result)
+            }
         })
         app.get('/users',async(req, res) => {
             const data = req.query.email
@@ -71,15 +73,15 @@ const run = async() => {
             }
         })
         app.get('/allseller',async(req,res)=>{
-            const query = { }
+            const query = {}
             const result = await userInformation.find(query).toArray()
-            const datas = result.filter(data=>data.user==='seller')
+            const datas = result.filter(data=> data.visitor ==='seller')
             res.send(datas)
         })
         app.get('/alluser',async(req,res)=>{
             const query = { }
             const result = await userInformation.find(query).toArray()
-            const datas = result.filter(data=>data.user==='user')
+            const datas = result.filter(data=>data.visitor==='user')
             res.send(datas)
         })
         app.delete('/userdelete',async(req,res)=>{
@@ -91,33 +93,20 @@ const run = async() => {
         app.get('/buyersCheck', async(req, res) => {
             const query = req.query.buyer;
             const email = {email:query}
-            const result = await userInformation.findOne(email)
-            if (result) {
-                if(result.user === 'user') {
-                    res.send(result)
-                    console.log(result)
-                }
-            }
+            const result = await userInformation.findOne(email, {visitor:"user"})
+            res.send(result)
         })
         app.get('/sellerCheck', async(req, res) => {
             const query = req.query.seller;
             const email = {email:query}
-            const result = await userInformation.findOne(email)
-            if (result) {
-                if(result.user === 'seller') {
-                    res.send(result)
-                }
-            }
+            const result = await userInformation.findOne(email, {visitor:"seller"})
+            res.send(result)
         })
         app.get('/admincheck', async(req, res) => {
             const query = req.query.admin;
             const email = {email:query}
-            const result = await userInformation.findOne(email)
-            if (result) {
-                if(result.user === 'admin') {
-                    res.send(result)
-                }
-            }
+            const result = await userInformation.findOne(email, {visitor:"admin"})
+            res.send(result)
         })
         app.get('/myproducts',async(req,res)=>{
             const data = req.query.email;
@@ -136,7 +125,7 @@ const run = async() => {
             const result = await servicesProducts.deleteOne(id)
             res.send(result)
         })
-        app.get('/homeadvertise', async(req, res) => {
+        app.get('/homeadvertise', async(req, res) =>{
             const query = {}
             const result = await availableBooking.find(query).toArray()
             res.send(result)
@@ -152,7 +141,7 @@ run().catch(error=>console.log(error))
 
 
 app.get('/', (req, res) => {
-    res.send('hello world')
+    res.send('hello world gsmarea')
 })
 app.listen(port,()=> {
     console.log('hello world welcome to gsmArea')
